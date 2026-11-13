@@ -1,3 +1,97 @@
+<?php
+require_once __DIR__ . '/conexao.php';
+
+$mensagem = '';
+$tipoMensagem = 'danger';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $tipo = $_POST['tipo'] ?? '';
+    $nome = trim($_POST['nome'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $matricula = trim($_POST['matricula'] ?? '');
+    $cursoSelecionado = trim($_POST['curso'] ?? '');
+    $outroCurso = trim($_POST['outro_curso'] ?? '');
+    $senha = $_POST['senha'] ?? '';
+    $confirmarSenha = $_POST['confirmar_senha'] ?? '';
+
+    try {
+        // Verifica o tipo de cadastro
+        if (!in_array($tipo, ['aluno', 'professor'], true)) {
+            throw new RuntimeException('Selecione um tipo de usuário válido.');
+        }
+        if ($nome === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $matricula === '' || $cursoSelecionado === '') {
+            throw new RuntimeException('Preencha corretamente todos os campos obrigatórios.');
+        }
+        if (mb_strlen($nome) > 100 || mb_strlen($email) > 150 || mb_strlen($matricula) > 30) {
+            throw new RuntimeException('Um ou mais campos excedem o tamanho permitido.');
+        }
+        if ($cursoSelecionado === 'Outro' && $outroCurso === '') {
+            throw new RuntimeException('Informe o nome do curso ou setor.');
+        }
+        if (strlen($senha) < 6) {
+            throw new RuntimeException('A senha deve ter pelo menos 6 caracteres.');
+        }
+        if ($senha !== $confirmarSenha) {
+            throw new RuntimeException('As senhas informadas não coincidem.');
+        }
+        if (!isset($_POST['termos'])) {
+            throw new RuntimeException('É necessário concordar com os termos para criar a conta.');
+        }
+
+        $cursoOuSetor = $cursoSelecionado === 'Outro' ? $outroCurso : $cursoSelecionado;
+        if (mb_strlen($cursoOuSetor) > 100) {
+            throw new RuntimeException('O curso ou setor deve ter no máximo 100 caracteres.');
+        }
+
+        $pdo->beginTransaction();
+        $verificaEmail = $pdo->prepare('SELECT usua_id FROM usuario WHERE usua_email = :email LIMIT 1');
+        $verificaEmail->execute(['email' => $email]);
+        if ($verificaEmail->fetch()) {
+            throw new RuntimeException('Este e-mail já está cadastrado.');
+        }
+
+        // Convenção usada pelo formulário: 1 = aluno; 2 = professor.
+        $tipoUsuario = $tipo === 'aluno' ? 1 : 2;
+        $insereUsuario = $pdo->prepare(
+            'INSERT INTO usuario (usua_nome, usua_email, usua_senha, usua_tipo_usuario) VALUES (:nome, :email, :senha, :tipo)'
+        );
+        $insereUsuario->execute([
+            'nome' => $nome,
+            'email' => $email,
+            'senha' => password_hash($senha, PASSWORD_DEFAULT),
+            'tipo' => $tipoUsuario,
+        ]);
+        $usuarioId = (int) $pdo->lastInsertId();
+
+        if ($tipo === 'aluno') {
+            $perfil = $pdo->prepare(
+                'INSERT INTO aluno (usua_id, alun_matricula, alun_curso) VALUES (:usuario_id, :matricula, :curso)'
+            );
+            $perfil->execute(['usuario_id' => $usuarioId, 'matricula' => $matricula, 'curso' => $cursoOuSetor]);
+        } else {
+            $perfil = $pdo->prepare(
+                'INSERT INTO professor (usua_id, prof_siap, prof_setor) VALUES (:usuario_id, :siap, :setor)'
+            );
+            $perfil->execute(['usuario_id' => $usuarioId, 'siap' => $matricula, 'setor' => $cursoOuSetor]);
+        }
+
+        $pdo->commit();
+        $mensagem = 'Conta criada com sucesso. Você já pode entrar.';
+        $tipoMensagem = 'success';
+    } catch (RuntimeException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        $mensagem = $e->getMessage();
+    } catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('Falha ao cadastrar usuário: ' . $e->getMessage());
+        $mensagem = 'Não foi possível concluir o cadastro. Verifique os dados e tente novamente.';
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -26,9 +120,7 @@
 
     <style>
 
-        /* =====================================
-           CONFIGURAÇÕES GERAIS
-        ===================================== */
+        /*CONFIGURAÇÕES GERAIS*/
 
         * {
             margin: 0;
@@ -60,9 +152,7 @@
         }
 
 
-        /* =====================================
-           TÍTULO
-        ===================================== */
+        /*TÍTULO*/
 
         .titulo-cadastro {
 
@@ -104,9 +194,7 @@
         }
 
 
-        /* =====================================
-           CARD
-        ===================================== */
+        /*CARD*/
 
         .cadastro-card {
 
@@ -127,9 +215,7 @@
         }
 
 
-        /* =====================================
-           TIPO DE USUÁRIO
-        ===================================== */
+        /*TIPO DE USUÁRIO*/
 
         .tipo-titulo {
 
@@ -315,9 +401,7 @@
         }
 
 
-        /* =====================================
-           TERMOS
-        ===================================== */
+        /*TERMOS*/
 
         .termos {
 
@@ -538,10 +622,12 @@
         <div class="cadastro-card">
 
 
-            <form
-                action="<?=URL?>/usuarios/cadastrar"
-                method="POST">
+            <form action="" method="POST">
 
+
+                <?php if ($mensagem !== ''): ?>
+                    <div class="alert alert-<?= $tipoMensagem ?>" role="alert"><?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?></div>
+                <?php endif; ?>
 
                 <!-- =================================
                      TIPO DE USUÁRIO
@@ -634,6 +720,7 @@
                             class="form-control"
                             id="nome"
                             name="nome"
+                            maxlength="100"
                             placeholder="Digite seu nome completo"
                             required>
 
@@ -659,6 +746,7 @@
                             class="form-control"
                             id="email"
                             name="email"
+                            maxlength="150"
                             placeholder="Digite seu e-mail"
                             required>
 
@@ -668,9 +756,7 @@
 
 
 
-                <!-- =================================
-                     MATRÍCULA / SIAPE
-                ================================== -->
+                <!-- MATRÍCULA / SIAPE -->
 
                 <div class="row">
 
@@ -692,6 +778,7 @@
                             class="form-control"
                             id="matricula"
                             name="matricula"
+                            maxlength="30"
                             placeholder="Digite sua matrícula"
                             required>
 
@@ -719,47 +806,48 @@
                             name="curso"
                             required>
 
-                            <option value="" selected disabled>
+                            <option value="Informática" selected disabled>
                                 Selecione seu curso
                             </option>
 
-                            <option>
+                            <option value="Informática">
                                 Informática
                             </option>
 
-                            <option>
+                            <option value="Biotecnologia">
                                 Biotecnologia
                             </option>
 
-                            <option>
+                            <option value="Administração">
                                 Administração
                             </option>
 
-                            <option>
+                            <option value="Enfermagem">
                                 Enfermagem
                             </option>
 
-                            <option>
+                            <option value="Análises Clínicas">
                                 Análises Clínicas
                             </option>
 
-                            <option>
+                            <option value="Ciências Biológicas">
                                 Ciências Biológicas
                             </option>
 
-                            <option>
+                            <option value="Outro">
                                 Outro
                             </option>
 
-                            <textarea
-                                class="form-control"
-                                id="outroCurso"
-                                name="outro_curso"
-                                placeholder="Digite o nome do seu curso"
-                                rows="3">
-                            </textarea>
-
                         </select>
+
+                        <input
+                            type="text"
+                            class="form-control mt-2"
+                            id="outroCurso"
+                            name="outro_curso"
+                            placeholder="Informe o curso ou setor"
+                            maxlength="100"
+                            hidden>
 
                     </div>
 
@@ -767,9 +855,7 @@
 
 
 
-                <!-- =================================
-                     SENHAS
-                ================================== -->
+                <!-- SENHAS -->
 
                 <div class="row">
 
@@ -862,9 +948,7 @@
 
 
 
-                <!-- =================================
-                     TERMOS
-                ================================== -->
+                <!-- TERMOS -->
 
                 <div class="form-check termos">
 
@@ -1004,6 +1088,7 @@ function alterarTipo() {
     const curso =
         document.getElementById("curso");
 
+    const outroCurso = document.getElementById("outroCurso");
 
     if (tipo === "professor") {
 
@@ -1023,25 +1108,25 @@ function alterarTipo() {
                 Selecione seu setor
             </option>
 
-            <option>
-                Informática
-            </option>
+            <option value="Informática">
+                                Informática
+                            </option>
 
-            <option>
-                Administração
-            </option>
+            <option value="Administração">
+                                Administração
+                            </option>
 
-            <option>
-                Coordenação
-            </option>
+            <option value="Coordenação">
+                                Coordenação
+                            </option>
 
-            <option>
-                Ensino
-            </option>
+            <option value="Ensino">
+                                Ensino
+                            </option>
 
-            <option>
-                Outro
-            </option>
+            <option value="Outro">
+                                Outro
+                            </option>
 
         `;
 
@@ -1065,32 +1150,42 @@ function alterarTipo() {
                 Selecione seu curso
             </option>
 
-            <option>
-                Informática
-            </option>
+            <option value="Informática">
+                                Informática
+                            </option>
 
-            <option>
-                Administração
-            </option>
+            <option value="Administração">
+                                Administração
+                            </option>
 
-            <option>
-                Agropecuária
-            </option>
+            <option value="Agropecuária">
+                                Agropecuária
+                            </option>
 
-            <option>
-                Edificações
-            </option>
+            <option value="Edificações">
+                                Edificações
+                            </option>
 
-            <option>
-                Outro
-            </option>
+            <option value="Outro">
+                                Outro
+                            </option>
 
         `;
 
     }
 
+    outroCurso.hidden = true;
+    outroCurso.required = false;
+    curso.onchange = function () {
+        const isOutro = this.value === "Outro";
+        outroCurso.hidden = !isOutro;
+        outroCurso.required = isOutro;
+        outroCurso.placeholder = tipo === "professor" ? "Informe seu setor ou área" : "Informe seu curso";
+        if (!isOutro) outroCurso.value = "";
+    };
 }
 
+document.addEventListener("DOMContentLoaded", alterarTipo);
 </script>
 
 
