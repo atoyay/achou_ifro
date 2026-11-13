@@ -38,6 +38,18 @@ include "../app/Libraries/Database.php";
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script> new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
 <!-- Fim do Código do VLibras -->
- 
+<!-- -- Permite aumentar ou diminuir o tamanho do texto sem recarregar a página. -->
+<script>
+
+    
+let tamanhoFonte = 16;
+function alterarFonte(delta) {
+    tamanhoFonte = Math.min(24, Math.max(12, tamanhoFonte + delta * 2));
+    document.documentElement.style.fontSize = tamanhoFonte + 'px';
+}
+</script>
+<screen-reader-only>
+    <button onclick="alterarFonte(12)">A+</button>
+    <button onclick="alterarFonte(-12)">A-</button>
 </body>
 </html>
