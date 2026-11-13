@@ -19,9 +19,7 @@
 
     <style>
 
-        /* ==============================
-           CONFIGURAÇÕES GERAIS
-        ============================== */
+        /*CONFIGURAÇÕES GERAIS*/
 
         * {
             margin: 0;
@@ -90,12 +88,10 @@
         }
 
 
-        /* ==============================
-           BANNER PRINCIPAL
-        ============================== */
+        /*BANNER DO INICIO*/
 
         .hero {
-            background-color: #f2c400;
+            background-color: #ffee8c;
             min-height: 390px;
 
             position: relative;
@@ -170,9 +166,7 @@
         }
 
 
-        /* ==============================
-           CAIXA ILUSTRATIVA
-        ============================== */
+        /*CAIXA ILUSTRATIVA*/
 
         .caixa-container {
             display: flex;
@@ -219,9 +213,7 @@
         }
 
 
-        /* ==============================
-           CATEGORIAS
-        ============================== */
+        /*CATEGORIAS*/
 
         .categorias {
             padding: 30px 0 20px;
@@ -280,9 +272,7 @@
         }
 
 
-        /* ==============================
-           ANÚNCIOS
-        ============================== */
+        /*ANÚNCIOS*/
 
         .anuncios {
             padding: 15px 0 60px;
@@ -389,9 +379,7 @@
         }
 
 
-        /* ==============================
-           RESPONSIVIDADE
-        ============================== */
+        /*RESPONSIVIDADE*/
 
         @media (max-width: 992px) {
 
@@ -542,14 +530,7 @@
 
                         <span class="input-group-text">
 
-                            <i class="bi bi-geo-alt"></i>
-
                         </span>
-
-                        <input
-                            type="text"
-                            class="form-control"
-                            placeholder="Local">
 
                     </div>
 
@@ -584,9 +565,9 @@
 
                         <div class="texto-caixa">
 
-                            Achados &<br>
+                            ACHOU<br>
 
-                            Perdidos
+                            IFRO
 
                         </div>
 
@@ -620,118 +601,6 @@
         </h2>
 
 
-        <div class="row g-3 justify-content-center">
-
-
-            <!-- DOCUMENTOS -->
-
-            <div class="col-6 col-sm-4 col-md-3 col-lg">
-
-                <div class="categoria">
-
-                    <i class="bi bi-person-vcard"></i>
-
-                    <span>Documentos</span>
-
-                </div>
-
-            </div>
-
-
-            <!-- ELETRÔNICOS -->
-
-            <div class="col-6 col-sm-4 col-md-3 col-lg">
-
-                <div class="categoria">
-
-                    <i class="bi bi-phone"></i>
-
-                    <span>Eletrônicos</span>
-
-                </div>
-
-            </div>
-
-
-            <!-- BOLSAS -->
-
-            <div class="col-6 col-sm-4 col-md-3 col-lg">
-
-                <div class="categoria">
-
-                    <i class="bi bi-backpack"></i>
-
-                    <span>Bolsas e Mochilas</span>
-
-                </div>
-
-            </div>
-
-
-            <!-- CHAVES -->
-
-            <div class="col-6 col-sm-4 col-md-3 col-lg">
-
-                <div class="categoria">
-
-                    <i class="bi bi-key"></i>
-
-                    <span>Chaves</span>
-
-                </div>
-
-            </div>
-
-
-            <!-- ROUPAS -->
-
-            <div class="col-6 col-sm-4 col-md-3 col-lg">
-
-                <div class="categoria">
-
-                    <i class="bi bi-handbag"></i>
-
-                    <span>Roupas</span>
-
-                </div>
-
-            </div>
-
-
-            <!-- ACESSÓRIOS -->
-
-            <div class="col-6 col-sm-4 col-md-3 col-lg">
-
-                <div class="categoria">
-
-                    <i class="bi bi-smartwatch"></i>
-
-                    <span>Acessórios</span>
-
-                </div>
-
-            </div>
-
-
-            <!-- OUTROS -->
-
-            <div class="col-6 col-sm-4 col-md-3 col-lg">
-
-                <div class="categoria">
-
-                    <i class="bi bi-question-circle"></i>
-
-                    <span>Outros</span>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    </div>
-
 </section>
 
 
@@ -751,9 +620,7 @@
 
             </h2>
 
-            <a href="#" class="ver-todos">
-
-                Ver todos
+            <a href="#" class="">
 
             </a>
 
