@@ -13,288 +13,144 @@ session_start();
 
     <style>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
+        * { /* Configurações gerais da página */
+            margin: 0; /* Remove as margens padrão */
+            padding: 0; /* Remove os espaços internos padrão */
+            box-sizing: border-box; /* Facilita o cálculo dos tamanhos */
+            font-family: Arial, sans-serif; /* Define a fonte do texto */
         }
 
-        body {
-            background: #ffffff;
-            color: #17251e;
+        body { /* Configura o corpo da página */
+            background: #ffffff; /* Define o fundo branco */
+            color: #17251e; /* Define a cor dos textos */
         }
 
-        /* ================= CABEÇALHO ================= */
+    /* BANNER */
 
-        header {
-            height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 7%;
-            background: #000000;
-            border-bottom: 1px solid #eeeeee;
+        .banner { /* Configura a parte principal do banner */
+            background: #ffee8c; /* Define o fundo amarelo-claro */
+            color: black; /* Define a cor do texto */
+            text-align: center; /* Centraliza os textos */
+            padding: 45px 20px; /* Adiciona espaço interno */
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .banner h1 { /* Configura o título do banner */
+            font-size: 38px; /* Define o tamanho do título */
+            margin-bottom: 12px; /* Adiciona espaço abaixo do título */
         }
 
-        .logo-icon {
-            width: 52px;
-            height: 52px;
-            border: 4px solid #000000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 25px;
+        .banner p { /* Configura o parágrafo do banner */
+            font-size: 16px; /* Define o tamanho da letra */
         }
 
-        .logo h2 {
-            color: #000000;
-            font-size: 19px;
-            line-height: 19px;
+    /* COMO FUNCIONA */
+
+        .passos { /* Organiza os quatro passos na página */
+            width: 85%; /* Define a largura em 85% da tela */
+            margin: 45px auto; /* Centraliza e adiciona espaço externo */
+            display: grid; /* Ativa o sistema de grade */
+            grid-template-columns: repeat(4, 1fr); /* Cria quatro colunas iguais */
+            gap: 35px; /* Define o espaço entre as colunas */
         }
 
-        .logo p {
-            color: #777;
-            font-size: 10px;
-            margin-top: 5px;
+        .passo { /* Configura cada etapa */
+            text-align: center; /* Centraliza o conteúdo */
+            position: relative; /* Permite posicionar elementos em relação a ele */
         }
 
-        nav {
-            display: flex;
-            gap: 35px;
-            align-items: center;
+        .numero {/* Configura os números dos passos */
+            width: 45px; /* Define a largura */
+            height: 45px; /* Define a altura */
+            margin: 0 auto 18px; /* Centraliza e adiciona espaço abaixo */
+            border-radius: 50%; /* Deixa o formato redondo */
+            background: #ddc566; /* Define o fundo amarelo */
+            color: black; /* Define a cor do número */
+            display: flex; /* Ativa o Flexbox */
+            justify-content: center; /* Centraliza na horizontal */
+            align-items: center; /* Centraliza na vertical */
+            font-size: 20px; /* Define o tamanho do número */
+            font-weight: bold; /* Deixa o número em negrito */
         }
 
-        nav a {
-            text-decoration: none;
-            color: #222;
-            font-size: 14px;
+        .imagem { /* Configura o espaço das imagens */
+            width: 100%; /* Ocupa toda a largura disponível */
+            height: 170px; /* Define a altura */
+            background: #f1f7f2; /* Define o fundo verde-claro */
+            border-radius: 10px; /* Arredonda os cantos */
+            display: flex; /* Ativa o Flexbox */
+            align-items: center; /* Centraliza na vertical */
+            justify-content: center; /* Centraliza na horizontal */
+            font-size: 70px; /* Define o tamanho do ícone */
+            margin-bottom: 20px; /* Adiciona espaço abaixo */
         }
 
-        nav a:hover {
-            color: #000000;
+        .passo h2 { /* Configura os títulos de cada passo */
+            font-size: 19px; /* Define o tamanho do título */
+            color: #111; /* Define a cor preta */
+            margin-bottom: 12px; /* Adiciona espaço abaixo */
         }
 
-        nav .ativo {
-            color: #000000;
-            font-weight: bold;
-            border-bottom: 2px solid #000000;
-            padding-bottom: 10px;
+        .passo p { /* Configura os textos de cada passo */
+            color: #555; /* Define a cor cinza */
+            line-height: 1.6; /* Aumenta o espaço entre as linhas */
+            font-size: 14px; /* Define o tamanho da letra */
         }
 
-        .botoes {
-            display: flex;
-            gap: 12px;
+    /* SEGURANÇA */
+
+        .seguranca { /* Configura a caixa de segurança */
+            width: 70%; /* Define a largura da caixa */
+            margin: 20px auto 45px; /* Centraliza e define os espaços externos */
+            padding: 25px; /* Adiciona espaço interno */
+            background: #f0f7f1; /* Define o fundo verde-claro */
+            border-radius: 10px; /* Arredonda os cantos */
+            display: flex; /* Coloca os elementos lado a lado */
+            align-items: center; /* Alinha os elementos verticalmente */
+            justify-content: center; /* Centraliza os elementos */
+            gap: 20px; /* Define o espaço entre os elementos */
         }
 
-        .entrar {
-            text-decoration: none;
-            color: #000000;
-            border: 1px solid #000000;
-            padding: 12px 25px;
-            border-radius: 6px;
-            font-weight: bold;
+        .seguranca-icon { /* Configura o ícone de segurança */
+            font-size: 55px; /* Define o tamanho do ícone */
+            color: #075c35; /* Define a cor verde-escura */
         }
 
-        .cadastrar {
-            text-decoration: none;
-            color: black;
-            background: #000000;
-            padding: 12px 25px;
-            border-radius: 6px;
-            font-weight: bold;
+        .seguranca h2 { /* Configura o título da segurança */
+            color: #075c35; /* Define a cor verde-escura */
+            margin-bottom: 8px; /* Adiciona espaço abaixo do título */
+            font-size: 20px; /* Define o tamanho da letra */
         }
 
-        /* ================= BANNER ================= */
-
-        .banner {
-            background: #FDFBD4;
-            color: black;
-            text-align: center;
-            padding: 45px 20px;
+        .seguranca p { /* Configura o parágrafo da segurança */
+            color: #333; /* Define a cor cinza-escura */
+            font-size: 14px; /* Define o tamanho da letra */
+            line-height: 1.6; /* Define o espaçamento entre as linhas */
         }
 
-        .banner h1 {
-            font-size: 38px;
-            margin-bottom: 12px;
-        }
+    /* RESPONSIVO */
 
-        .banner p {
-            font-size: 16px;
-        }
+        @media (max-width: 1000px) { /* Adapta o site para telas de até 1000 pixels */
 
-        /* ================= COMO FUNCIONA ================= */
+    header {
+        padding: 15px 3%; /* Ajusta o espaço interno do cabeçalho */
+    }
 
-        .passos {
-            width: 85%;
-            margin: 45px auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 35px;
-        }
+    nav {
+        gap: 15px; /* Diminui o espaço entre os links */
+    }
 
-        .passo {
-            text-align: center;
-            position: relative;
-        }
+    .passos {
+        width: 90%; /* Aumenta a largura da área dos passos */
+        grid-template-columns: repeat(2, 1fr); /* Organiza em duas colunas */
+    }
 
-        .numero {
-            width: 45px;
-            height: 45px;
-            margin: 0 auto 18px;
-            border-radius: 50%;
-            background: #FDFBD4;
-            color: black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            font-weight: bold;
-        }
+    .seguranca {
+        width: 90%; /* Aumenta a largura da caixa de segurança */
+    }
 
-        .imagem {
-            width: 100%;
-            height: 170px;
-            background: #f1f7f2;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 70px;
-            margin-bottom: 20px;
-        }
+}
 
-        .passo h2 {
-            font-size: 19px;
-            color: #111;
-            margin-bottom: 12px;
-        }
-
-        .passo p {
-            color: #555;
-            line-height: 1.6;
-            font-size: 14px;
-        }
-
-        /* ================= SEGURANÇA ================= */
-
-        .seguranca {
-            width: 70%;
-            margin: 20px auto 45px;
-            padding: 25px;
-            background: #f0f7f1;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .seguranca-icon {
-            font-size: 55px;
-            color: #075c35;
-        }
-
-        .seguranca h2 {
-            color: #075c35;
-            margin-bottom: 8px;
-            font-size: 20px;
-        }
-
-        .seguranca p {
-            color: #333;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* ================= RODAPÉ ================= */
-
-        footer {
-            background: #ffee8c;
-            color: black;
-            padding: 40px 7% 20px;
-        }
-
-        .footer-conteudo {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr 1.5fr;
-            gap: 50px;
-        }
-
-        footer h3 {
-            margin-bottom: 18px;
-            font-size: 16px;
-        }
-
-        footer p,
-        footer a {
-            display: block;
-            color: #000000;
-            text-decoration: none;
-            font-size: 13px;
-            margin-bottom: 10px;
-        }
-
-        footer a:hover {
-            color: white;
-        }
-
-        .redes {
-            display: flex;
-            gap: 12px;
-            margin-top: 18px;
-        }
-
-        .rede {
-            width: 32px;
-            height: 32px;
-            border: 1px solid white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .copyright {
-            border-top: 1px solid #fefe18;
-            margin-top: 30px;
-            padding-top: 18px;
-            text-align: center;
-            color: #000000;
-            font-size: 12px;
-        }
-
-        /* ================= RESPONSIVO ================= */
-
-        @media (max-width: 1000px) {
-
-            header {
-                padding: 15px 3%;
-            }
-
-            nav {
-                gap: 15px;
-            }
-
-            .passos {
-                width: 90%;
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .seguranca {
-                width: 90%;
-            }
-
-        }
-
-    </style>
+</style>
 
 <!-- ================= BANNER ================= -->
 
