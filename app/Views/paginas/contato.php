@@ -90,9 +90,7 @@
         }
 
 
-        /* =========================================
-           ÁREA PRINCIPAL
-        ========================================= */
+        /*ÁREA PRINCIPAL*/
 
         .contato-section {
             min-height: calc(100vh - 80px);
@@ -103,9 +101,7 @@
         }
 
 
-        /* =========================================
-           TÍTULO
-        ========================================= */
+        /*TÍTULO */
 
         .titulo-contato {
             text-align: center;
@@ -372,24 +368,6 @@
 
             text-align: center;
         }
-
-
-        /* =========================================
-           RODAPÉ
-        ========================================= */
-
-        footer {
-            background-color: #222222;
-
-            color: #ffffff;
-
-            text-align: center;
-
-            padding: 18px;
-
-            font-size: 13px;
-        }
-
 
         /* =========================================
            RESPONSIVIDADE
