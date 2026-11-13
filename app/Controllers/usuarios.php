@@ -9,8 +9,11 @@ class Usuarios extends Controller{
             $dados = [
                 'nome' => trim($formulario['nome'] ?? ''),
                 'email' => trim($formulario['email'] ?? ''),
+                'matricula' => trim($formulario['matricula'] ?? ''),
+                'curso' => trim($formulario['curso'] ?? ''),
                 'senha' => trim($formulario['senha'] ?? ''),
                 'confirma_senha' => trim($formulario['confirma_senha'] ?? ''),
+                'termos' => trim($formulario['termos'] ?? ''),
             ];
 
             var_dump($formulario);
@@ -23,12 +26,24 @@ class Usuarios extends Controller{
                 $dados['email_erro'] = 'Preencha o campo e-mail';
             endif;
 
+            if (empty($formulario['matricula'])):
+                $dados['matricula_erro'] = 'Preencha o campo matrícula';
+            endif;
+
+            if (empty($formulario['curso'])):
+                $dados['curso_erro'] = 'Preencha o campo curso';
+            endif;
+
             if (empty($formulario['senha'])):
                 $dados['senha_erro'] = 'Preencha o campo senha';
             endif;
 
             if (empty($formulario['confirma_senha'])):
                 $dados['confirma_senha_erro'] = 'Preencha o campo confirma senha';
+            endif;
+
+            if (empty($formulario['termos'])):
+                $dados['termos_erro'] = 'Você deve aceitar os termos de uso';
             endif;
 
         else:
@@ -40,79 +55,25 @@ class Usuarios extends Controller{
               else:
             die('Erro ao armazenar o usuário no banco de dados');
             endif;
-
         endif;
     else:
             $dados=[
                 'nome'=>'',
                 'email'=>'',
+                'matricula'=>'',
+                'curso'=>'',
                 'senha'=>'',
                 'confirma_senha'=>'',
                 'nome_erro'=>'',
                 'email_erro'=>'',
+                'matricula_erro'=>'',
+                'curso_erro'=>'',
                 'senha_erro'=>'',
                 'confirma_senha_erro'=>'',
+                'termos_erro'=>''
         ];
         endif;
 
         $this->view('usuarios/cadastrar', $dados);
     } // fim da função cadastrar
-
-     public function login(){
-        $formulario = filter_input_array(INPUT_POST, 
-        FILTER_SANITIZE_CHARS);
-        if(isset($formulario)):
-            $dados = [
-                'email'=>trim($formulario['email']),
-                'senha'=>trim($formulario['senha']),
-            ];
-            if(in_array("", $formulario)):
-                if(empty($formulario['email'])):
-                    $dados['email_erro'] = 'Preencha o campo Email';
-                endif;
-                if(empty($formulario['senha'])):
-                    $dados['senha_erro'] = 'Preencha o campo Senha';
-                endif;
-            else:
-                if(Checa::checarEmail($formulario['email'])):
-                    $dados[ email_erro] = "O e-email informado é 
-                    inválido";
-                else:
-                    $usuario = $this->usuarioModel->checharLogin($formulario
-                    ['email'], $formulario['senha']);
-                    if($usuario):
-                        $this->criarSessaoUsuario($usuario);
-                    else:
-                        Sessao::mensagem('usuario', 'Usuário ou senha 
-                        invalidos','alert alert-danger');
-                    endif;
-                endif;
-            endif;
-        else:
-            $dados = [
-                'email'=>'',
-                'senha'=>'',
-                'email_erro'=>'',
-                'senha_erro'=>'',
-            ];
-        endif;
-        
-        $this->view('usuarios/login');
-    }//fim da função login
-
-    public function criarSessaoUsuario($usuario){
-        $_SESSION['usuario_id'] = $usuario->id;
-        $_SESSION['usuario_nome'] = $usuario->nome;
-        $_SESSION['usuario_email'] = $usuario->email;
-
-        Url::redirecionar('posts');
-    }//fim da função criarSessaoUsuario
-
-    public function sair(){
-        unset($_SESSION['usuario_id']);
-        unset($_SESSION['usuario_nome']);
-        unset($_SESSION['usuario_email']);
-        session_destroy();
-        Url::redirecionar('usuarios/login');
-    }//fim da função sair
 }//fim da classe Usuarios
