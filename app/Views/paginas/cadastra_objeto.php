@@ -1,33 +1,194 @@
 <?php
-session_start();
+require_once __DIR__ . '/conexao.php';
 
-$mensagem = "";
+$mensagem = '';
+$tipoMensagem = 'danger';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $tipo = $_POST["tipo"] ?? "";
-    $nome = trim($_POST["nome"] ?? "");
-    $categoria = $_POST["categoria"] ?? "";
-    $cor = trim($_POST["cor"] ?? "");
-    $descricao = trim($_POST["descricao"] ?? "");
-    $local = trim($_POST["local"] ?? "");
-    $data = $_POST["data"] ?? "";
-    $horario = $_POST["horario"] ?? "";
+    $tipo = trim($_POST['tipo'] ?? '');
+    $nome = trim($_POST['nome'] ?? '');
+    $categoria = trim($_POST['categoria'] ?? '');
+    $cor = trim($_POST['cor'] ?? '');
+    $descricao = trim($_POST['descricao'] ?? '');
+    $local = trim($_POST['local'] ?? '');
+    $data = trim($_POST['data'] ?? '');
+    $horario = trim($_POST['horario'] ?? '');
 
-    if (
-        empty($tipo) ||
-        empty($nome) ||
-        empty($categoria) ||
-        empty($descricao) ||
-        empty($local) ||
-        empty($data)
-    ) {
-        $mensagem = "Preencha todos os campos obrigatórios.";
-    } else {
+    $foto = null;
 
-        // Aqui você poderá salvar no banco de dados depois.
+    try {
 
-        $mensagem = "Anúncio cadastrado com sucesso!";
+        // Verifica o tipo do anúncio
+        if (!in_array($tipo, ['perdido', 'encontrado'], true)) {
+            throw new RuntimeException('Selecione se o objeto foi perdido ou encontrado.');
+        }
+
+        // Verifica os campos obrigatórios
+        if (
+            $nome === '' ||
+            $categoria === '' ||
+            $descricao === '' ||
+            $local === '' ||
+            $data === '' ||
+            $horario === ''
+        ) {
+            throw new RuntimeException('Preencha todos os campos obrigatórios.');
+        }
+
+        // Verifica o tamanho dos campos
+        if (
+            mb_strlen($nome) > 100 ||
+            mb_strlen($categoria) > 50 ||
+            mb_strlen($cor) > 50 ||
+            mb_strlen($local) > 200
+        ) {
+            throw new RuntimeException('Um ou mais campos excedem o tamanho permitido.');
+        }
+
+        // Verifica a data
+        $dataObjeto = DateTime::createFromFormat('Y-m-d', $data);
+
+        if (!$dataObjeto || $dataObjeto->format('Y-m-d') !== $data) {
+            throw new RuntimeException('Informe uma data válida.');
+        }
+
+        // Verifica o horário
+        if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $horario)) {
+            throw new RuntimeException('Informe um horário válido.');
+        }
+
+        // Verifica a descrição
+        if (mb_strlen($descricao) > 2000) {
+            throw new RuntimeException('A descrição deve ter no máximo 2000 caracteres.');
+        }
+
+        // Verifica se foi enviada uma foto
+        if (isset($_FILES['foto']) && $_FILES['foto']['error'] !== UPLOAD_ERR_NO_FILE) {
+
+            if ($_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
+                throw new RuntimeException('Erro ao enviar a foto.');
+            }
+
+            if ($_FILES['foto']['size'] > 5 * 1024 * 1024) {
+                throw new RuntimeException('A foto deve ter no máximo 5 MB.');
+            }
+
+            $extensoesPermitidas = ['jpg', 'jpeg', 'png', 'webp'];
+
+            $extensao = strtolower(
+                pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION)
+            );
+
+            if (!in_array($extensao, $extensoesPermitidas, true)) {
+                throw new RuntimeException('Formato de foto não permitido.');
+            }
+
+            $tipoArquivo = mime_content_type($_FILES['foto']['tmp_name']);
+
+            $tiposPermitidos = [
+                'image/jpeg',
+                'image/png',
+                'image/webp'
+            ];
+
+            if (!in_array($tipoArquivo, $tiposPermitidos, true)) {
+                throw new RuntimeException('O arquivo enviado não é uma imagem válida.');
+            }
+
+            // Cria a pasta de imagens, caso não exista
+            $pasta = __DIR__ . '/uploads/objetos/';
+
+            if (!is_dir($pasta) && !mkdir($pasta, 0755, true)) {
+                throw new RuntimeException('Não foi possível criar a pasta de imagens.');
+            }
+
+            // Gera um nome seguro para a imagem
+            $nomeFoto = bin2hex(random_bytes(16)) . '.' . $extensao;
+
+            $destino = $pasta . $nomeFoto;
+
+            if (!move_uploaded_file($_FILES['foto']['tmp_name'], $destino)) {
+                throw new RuntimeException('Não foi possível salvar a foto.');
+            }
+
+            $foto = 'uploads/objetos/' . $nomeFoto;
+        }
+
+        // Recupera o usuário que está logado
+        if (!isset($_SESSION['usuario_id'])) {
+            throw new RuntimeException('Faça login para cadastrar um objeto.');
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+
+        $pdo->beginTransaction();
+
+        // Insere o objeto no banco de dados
+        $insereObjeto = $pdo->prepare(
+            'INSERT INTO objetos
+            (
+                usuario_id,
+                tipo,
+                nome,
+                categoria,
+                cor,
+                descricao,
+                local_encontrado,
+                data_encontrado,
+                horario,
+                foto
+            )
+            VALUES
+            (
+                :usuario_id,
+                :tipo,
+                :nome,
+                :categoria,
+                :cor,
+                :descricao,
+                :local,
+                :data,
+                :horario,
+                :foto
+            )'
+        );
+
+        $insereObjeto->execute([
+            'usuario_id' => $usuarioId,
+            'tipo' => $tipo,
+            'nome' => $nome,
+            'categoria' => $categoria,
+            'cor' => $cor !== '' ? $cor : null,
+            'descricao' => $descricao,
+            'local' => $local,
+            'data' => $data,
+            'horario' => $horario,
+            'foto' => $foto
+        ]);
+
+        $pdo->commit();
+
+        $mensagem = 'Objeto cadastrado com sucesso!';
+        $tipoMensagem = 'success';
+
+    } catch (RuntimeException $e) {
+
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        $mensagem = $e->getMessage();
+
+    } catch (PDOException $e) {
+
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        error_log('Falha ao cadastrar objeto: ' . $e->getMessage());
+
+        $mensagem = 'Não foi possível cadastrar o objeto. Verifique os dados e tente novamente.';
     }
 }
 ?>
@@ -55,77 +216,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             color: #17251e;
         }
 
-        /* CABEÇALHO */
-
-        header {
-            height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #b39516;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            border: 4px solid #f4ff23;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #075c35;
-            font-size: 23px;
-            font-weight: bold;
-        }
-
-        .logo-text h2 {
-            color: #ffec7d;
-            font-size: 20px;
-        }
-
-        .logo-text p {
-            font-size: 10px;
-            color: #f0f0f0;
-            margin-top: 3px;
-        }
-
-        .ativo {
-            color: #08733e !important;
-            font-weight: bold;
-            border-bottom: 2px solid #08733e;
-            padding-bottom: 10px;
-        }
-
-        .botoes {
-            display: flex;
-            gap: 14px;
-        }
-
-        .btn-entrar {
-            padding: 13px 25px;
-            border: 1px solid #075c35;
-            border-radius: 6px;
-            color: #075c35;
-            background: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .btn-cadastrar {
-            padding: 13px 25px;
-            border-radius: 6px;
-            color: white;
-            background: #ffec7d;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
+        
         /* CONTEÚDO */
 
         .container {
@@ -140,8 +231,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         .titulo p {
-            color: #555;
-            margin-bottom: 25px;
+            color: #0f0f0f;
+            margin-bottom: 30px;
         }
 
         .conteudo {
