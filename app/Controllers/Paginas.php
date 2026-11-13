@@ -3,10 +3,10 @@ class Paginas extends Controller{
     public function index(){
         $dados = [
             'titulo' => 'Página Inicial',
-            'descricao' => ''
+            'descricao' => 'Pagina inicial'
         ];
         $this->view('paginas/inicio', $dados);
-    }
+    }//fim da funcao index
    public function como_funciona(){
     $dados = [
         'titulo' => 'Como Funciona',
